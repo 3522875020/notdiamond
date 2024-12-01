@@ -9,3 +9,4 @@ services:
       - PORT=3000
       - AUTH_EMAIL=your_email@example.com
       - AUTH_PASSWORD=your_password
+      - NOTDIAMOND_URLS=https://not-diamond-workers.t7-cc4.workers.dev/stream-message

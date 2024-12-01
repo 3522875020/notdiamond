@@ -52,7 +52,9 @@ auth_manager = AuthManager(
 
 def get_notdiamond_url():
     """随机选择并返回一个 notdiamond URL。"""
-    return random.choice(NOTDIAMOND_URLS)
+    url = random.choice(NOTDIAMOND_URLS)
+    logger.info(f"Selected NotDiamond URL: {url}")
+    return url
 
 def get_notdiamond_headers():
     """返回用于 notdiamond API 请求的头信息。"""
@@ -99,6 +101,11 @@ def make_request(payload):
     for attempt in range(3):  # 最多尝试3次
         try:
             headers = get_notdiamond_headers()
+            # 添加日志来调试请求
+            logger.info(f"Sending request to URL: {url}")
+            logger.info(f"Request headers: {headers}")
+            logger.info(f"Request payload: {payload}")
+            
             response = executor.submit(
                 requests.post, 
                 url, 
@@ -108,19 +115,20 @@ def make_request(payload):
                 timeout=REQUEST_TIMEOUT
             ).result()
 
+            # 添加响应日志
+            logger.info(f"Response status: {response.status_code}")
+            logger.info(f"Response headers: {dict(response.headers)}")
+
             if response.status_code == 200:
-                if response.headers.get('Content-Type') == 'text/event-stream':
-                    return response
-                else:
-                    logger.warning(f"Unexpected content type: {response.headers.get('Content-Type')}")
-            
+                return response
             elif response.status_code == 401:  # 认证错误
                 logger.info("Authentication failed, refreshing token...")
                 auth_manager.refresh_user_token()
                 continue
-                
-            elif response.status_code == 500:  # 服务器错误
-                return response
+            elif response.status_code == 404:  # 添加404错误的具体处理
+                logger.error(f"API endpoint not found: {url}")
+                last_error = f"API endpoint not found: {url}"
+                break
                 
             last_error = f"HTTP {response.status_code}: {response.text}"
             
@@ -177,8 +185,13 @@ def handle_request():
     """处理聊天完成请求。"""
     try:
         request_data = request.get_json()
+        logger.info(f"Received request data: {request_data}")
+        
         model_id = request_data.get('model', '')
+        logger.info(f"Requested model: {model_id}")
+        
         if model_id not in MODEL_INFO:
+            logger.error(f"Unsupported model: {model_id}")
             return jsonify({
                 'error': {
                     'message': '模型不支持,通过v1/models获取支持的模型列表',
@@ -190,13 +203,20 @@ def handle_request():
             }), 400
 
         stream = request_data.get('stream', False)
+        logger.info(f"Stream mode: {stream}")
 
         prompt_tokens = count_message_tokens(
             request_data.get('messages', []),
             model_id
         )
+        logger.info(f"Prompt tokens: {prompt_tokens}")
 
         payload = build_payload(request_data, model_id)
+        logger.info(f"Built payload: {payload}")
+        
+        # 检查环境变量
+        logger.info(f"NOTDIAMOND_URLS environment variable: {os.getenv('NOTDIAMOND_URLS')}")
+        
         response = make_request(payload)
 
         if stream:
