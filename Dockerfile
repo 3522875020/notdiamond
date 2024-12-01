@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制应用代码
 COPY . .
-
+# 设置 FLASK_APP 环境变量
+ENV FLASK_APP=app.app
 # 暴露端口
 EXPOSE 3000
 
@@ -22,3 +23,4 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
 
 # 使用 JSON 格式的 CMD 指令
 CMD ["sh", "/app/start.sh"]
+
