@@ -11,7 +11,7 @@ from flask import Flask, Response, jsonify, request, stream_with_context
 from flask_cors import CORS
 
 from .auth_utils import AuthManager
-from constants import (
+from .constants import (
     CONTENT_TYPE_EVENT_STREAM,
     DEFAULT_AUTH_EMAIL,
     DEFAULT_AUTH_PASSWORD,
@@ -23,8 +23,8 @@ from constants import (
     USER_AGENT,
     API_PREFIX,
 )
-from model_info import MODEL_INFO
-from utils import count_message_tokens, handle_non_stream_response, generate_stream_response
+from .model_info import MODEL_INFO
+from .utils import count_message_tokens, handle_non_stream_response, generate_stream_response
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
