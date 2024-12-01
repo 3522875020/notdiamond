@@ -24,3 +24,4 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
 # 使用 JSON 格式的 CMD 指令
 CMD ["sh", "/app/start.sh"]
 
+

@@ -10,7 +10,7 @@ import requests
 from flask import Flask, Response, jsonify, request, stream_with_context
 from flask_cors import CORS
 
-from auth_utils import AuthManager
+from .auth_utils import AuthManager
 from constants import (
     CONTENT_TYPE_EVENT_STREAM,
     DEFAULT_AUTH_EMAIL,
@@ -225,7 +225,7 @@ def handle_request():
                 'message': 'Invalid JSON in request',
                 'type': 'invalid_request_error',
                 'param': None,
-                'code': None,
+                'code': 'invalid_json',
                 'details': str(e)
             }
         }), 400
