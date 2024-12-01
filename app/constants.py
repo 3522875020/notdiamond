@@ -5,7 +5,7 @@ CONTENT_TYPE_EVENT_STREAM = 'text/event-stream'
 
 # 默认值
 DEFAULT_PORT = 3000
-DEFAULT_NOTDIAMOND_URL = 'https://not-diamond-api.onrender.com/stream-message'
+DEFAULT_NOTDIAMOND_URL = 'https://not-diamond-workers.t7-cc4.workers.dev/stream-message'
 DEFAULT_AUTH_EMAIL = "default_email@example.com"
 DEFAULT_AUTH_PASSWORD = "default_password"
 
