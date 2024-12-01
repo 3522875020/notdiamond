@@ -2,7 +2,7 @@ import json
 import uuid
 import time
 import tiktoken
-from constants import CHAT_COMPLETION_CHUNK, CONTENT_TYPE_EVENT_STREAM
+from .constants import CHAT_COMPLETION_CHUNK, CONTENT_TYPE_EVENT_STREAM
 from flask import jsonify
 import logging
 
