@@ -1,6 +1,9 @@
 import logging
 import re
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+import json
+import threading
+from collections import deque
 
 import requests
 from requests.exceptions import RequestException
@@ -9,6 +12,32 @@ from requests.exceptions import RequestException
 _BASE_URL = "https://chat.notdiamond.ai"
 _API_BASE_URL = "https://spuckhogycrxcbomznwo.supabase.co"
 _USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+
+class AccountPool:
+    """管理多个账号的认证状态"""
+    
+    def __init__(self, accounts: List[Dict[str, str]]):
+        self._accounts = deque(
+            [AuthManager(acc["email"], acc["password"]) for acc in accounts]
+        )
+        self._lock = threading.Lock()
+        self._initialize_accounts()
+    
+    def _initialize_accounts(self):
+        """初始化所有账号"""
+        for auth_manager in self._accounts:
+            try:
+                auth_manager.login()
+            except Exception as e:
+                logging.error(f"Account initialization failed: {e}")
+    
+    def get_auth_manager(self) -> 'AuthManager':
+        """获取下一个可用的认证管理器"""
+        with self._lock:
+            # 将当前管理器移到队列末尾并返回
+            auth_manager = self._accounts[0]
+            self._accounts.rotate(-1)
+            return auth_manager
 
 class AuthManager:
     """
@@ -112,3 +141,18 @@ class AuthManager:
         except RequestException as e:
             self._logger.error(f"请求错误 ({method} {url}): {e}")
             raise
+
+# 创建全局账号池
+_account_pool = None
+
+def initialize_account_pool(accounts: List[Dict[str, str]]) -> None:
+    """初始化全局账号池"""
+    global _account_pool
+    if _account_pool is None:
+        _account_pool = AccountPool(accounts)
+
+def get_auth_manager() -> AuthManager:
+    """获取下一个可用的认证管理器"""
+    if _account_pool is None:
+        raise RuntimeError("Account pool not initialized")
+    return _account_pool.get_auth_manager()

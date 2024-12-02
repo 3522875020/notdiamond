@@ -10,7 +10,7 @@ import requests
 from flask import Flask, Response, jsonify, request, stream_with_context
 from flask_cors import CORS
 
-from .auth_utils import AuthManager
+from .auth_utils import initialize_account_pool, get_auth_manager
 from .constants import (
     CONTENT_TYPE_EVENT_STREAM,
     DEFAULT_AUTH_EMAIL,
@@ -22,6 +22,7 @@ from .constants import (
     SYSTEM_MESSAGE_CONTENT,
     USER_AGENT,
     API_PREFIX,
+    DEFAULT_ACCOUNTS,
 )
 from .model_info import MODEL_INFO
 from .utils import count_message_tokens, handle_non_stream_response, generate_stream_response
@@ -45,9 +46,8 @@ import atexit
 atexit.register(lambda: executor.shutdown(wait=True))
 
 # 初始化认证管理器
-auth_manager = AuthManager(
-    os.getenv("AUTH_EMAIL", DEFAULT_AUTH_EMAIL),
-    os.getenv("AUTH_PASSWORD", DEFAULT_AUTH_PASSWORD),
+initialize_account_pool(
+    json.loads(os.getenv("AUTH_ACCOUNTS", json.dumps(DEFAULT_ACCOUNTS)))
 )
 
 def get_notdiamond_url():
@@ -58,6 +58,7 @@ def get_notdiamond_url():
 
 def get_notdiamond_headers():
     """返回用于 notdiamond API 请求的头信息。"""
+    auth_manager = get_auth_manager()
     jwt = auth_manager.get_jwt_value()
     if not jwt:
         auth_manager.login()

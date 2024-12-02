@@ -33,3 +33,11 @@ DEFAULT_TEMPERATURE = 1
 
 # API 前缀
 API_PREFIX = "/api"
+
+# 账号配置格式
+DEFAULT_ACCOUNTS = [
+    {
+        "email": "default_email@example.com",
+        "password": "default_password"
+    }
+]

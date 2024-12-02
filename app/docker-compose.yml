@@ -7,6 +7,5 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - AUTH_EMAIL=your_email@example.com
-      - AUTH_PASSWORD=your_password
+      - AUTH_ACCOUNTS=[{"email":"email1@example.com","password":"password1"},{"email":"email2@example.com","password":"password2"}]
       - NOTDIAMOND_URLS=https://not-diamond-workers.t7-cc4.workers.dev/stream-message
